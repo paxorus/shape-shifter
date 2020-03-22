@@ -56,8 +56,8 @@ function Transitioner(svgRoot, svgPolygon) {
 
 	function interpolate(polyA, polyB) {
 		// interpolate points in polyA to match polyB's number of sides
-		var scale = (polyB.length - 1) / (polyA.length - 1);// (6-1)/(3-1) = 2.5, 5/3
-		var bounds = polyA.map(function (x, idx) {// [0,1,2] -> [0,3,5], [0,1,3]
+		var scale = polyB.length / polyA.length;// pentagon -> triangle = 5/3
+		var bounds = polyA.map(function (x, idx) { // [0,1,2] -> [0,2,4]
 			return Math.round(idx * scale);
 		});
 		var newPolyA = new Array(polyB.length).fill(-1);
@@ -75,8 +75,14 @@ function Transitioner(svgRoot, svgPolygon) {
 				continue;
 			}
 			var leftPoint = polyA[boundsIdx];
-			var rightPoint = polyA[boundsIdx + 1];
-			var weight = (i - bounds[boundsIdx]) / (bounds[boundsIdx + 1] - bounds[boundsIdx]);
+			var rightPoint = polyA[(boundsIdx + 1) % bounds.length];
+
+			let numDivisionsOfEdge = (bounds[(boundsIdx + 1) % bounds.length] - bounds[boundsIdx]);
+			if (numDivisionsOfEdge < 0) {
+				numDivisionsOfEdge += newPolyA.length;
+			}
+
+			var weight = (i - bounds[boundsIdx]) / numDivisionsOfEdge;
 			var interpolatedPoint = [
 				weightedAverage(leftPoint[0], rightPoint[0], weight),
 				weightedAverage(leftPoint[1], rightPoint[1], weight)
